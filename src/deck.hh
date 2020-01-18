@@ -1,22 +1,25 @@
 #pragma once
 
-#include "card.hh"
 #include <iostream>
 #include <memory>
 #include <vector>
 
+#include "card.hh"
+
 using cards_t = std::shared_ptr<std::vector<Card>>;
 
-class Deck {
+class Deck
+{
 public:
-  Deck();
-  friend std::ostream &operator<<(std::ostream &os, const Deck &d);
-  void brandNewDeck();
-  void shakeDeck();
-  Card pickToDeck();
-  void addToDeck(Card c);
-  std::vector<cards_t> getAllMoves();
+    Deck();
+    friend std::ostream& operator<<(std::ostream& os, const Deck& d);
+    void brandNew();
+    void shake();
+    Card pick(int index = 0);
+    void add(Card c);
+    size_t getSize();
+    int getValue();
 
 private:
-  cards_t cards;
+    cards_t cards;
 };

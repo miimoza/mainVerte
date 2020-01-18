@@ -2,10 +2,18 @@
 
 #include <cstdlib>
 
-class Game {
+#include "deck.hh"
+
+class Game
+{
 public:
-  Game(size_t nb_player);
+    Game();
+    void dump();
+    int runLoop();
 
 private:
-  size_t nb_player;
+    Deck hand_p1;
+    Deck hand_p2;
+    Deck heap;
+    Deck cemetery;
 };

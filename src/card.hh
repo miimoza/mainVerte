@@ -3,14 +3,23 @@
 #include <cstddef>
 #include <iostream>
 
-enum Color { SPADE, DIAMOND, HEART, CLUB };
+enum Color
+{
+    SPADE,
+    DIAMOND,
+    HEART,
+    CLUB
+};
 
-class Card {
+class Card
+{
 public:
-  Card(enum Color color, int value);
-  friend std::ostream &operator<<(std::ostream &os, const Card &c);
+    Card(enum Color color, int value);
+    friend std::ostream& operator<<(std::ostream& os, const Card& c);
+    int getValue();
+    enum Color getColor();
 
 private:
-  enum Color color;
-  size_t value;
+    enum Color color;
+    int value;
 };
