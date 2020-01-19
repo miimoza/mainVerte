@@ -5,10 +5,10 @@
 
 enum Color
 {
-    SPADE,
-    DIAMOND,
-    HEART,
-    CLUB
+    SPADE = 1,
+    DIAMOND = 2,
+    HEART = 4,
+    CLUB = 8
 };
 
 class Card

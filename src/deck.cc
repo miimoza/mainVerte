@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <random>
 
 Deck::Deck()
 {
@@ -33,14 +34,18 @@ void Deck::brandNew()
     }
 }
 
-void Deck::shake()
+void Deck::shuffle()
 {
     if ((*cards).size() > 0)
     {
-        for (int i = 0; i < 10000; i++)
+        for (int i = 0; i < 1000; i++)
         {
-            size_t rnd_1 = rand() % (*cards).size();
-            size_t rnd_2 = rand() % (*cards).size();
+            std::random_device rd;
+            std::mt19937 mt(rd());
+            std::uniform_real_distribution<double> dist(0, (*cards).size() - 1);
+
+            size_t rnd_1 = std::round(dist(mt));
+            size_t rnd_2 = std::round(dist(mt));
 
             Card tmp_card = (*cards).at(rnd_1);
 
@@ -70,6 +75,12 @@ void Deck::add(Card c)
     (*cards).push_back(c);
 }
 
+void Deck::addDeck(Deck deck)
+{
+    while (deck.getSize() > 0)
+        (*cards).push_back(deck.pick());
+}
+
 size_t Deck::getSize()
 {
     return (*cards).size();
@@ -79,6 +90,19 @@ int Deck::getValue()
 {
     int sum = 0;
     for (size_t i = 0; i < (*cards).size(); i++)
-        sum += (*cards).at(i).getValue();
+    {
+        if ((*cards).at(i).getValue() == 10
+            && ((*cards).at(i).getColor() & (DIAMOND | HEART)))
+            sum += -1;
+        else if ((*cards).at(i).getValue() > 9)
+            sum += 11;
+        else
+            sum += (*cards).at(i).getValue() + 1;
+    }
     return sum;
+}
+
+void Deck::clear()
+{
+    (*cards).clear();
 }

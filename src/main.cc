@@ -1,3 +1,4 @@
+#include <clocale>
 #include <iostream>
 
 #include "card.hh"
@@ -7,6 +8,5 @@
 int main()
 {
     Game game = Game();
-    game.dump();
     game.runLoop();
 }

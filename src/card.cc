@@ -20,25 +20,193 @@ enum Color Card::getColor()
 
 std::ostream& operator<<(std::ostream& os, const Card& c)
 {
-    os << c.value;
-
     switch (c.color)
     {
     case SPADE:
-        os << "S";
+        os << "\033[30m";
+        switch (c.value)
+        {
+        case 0:
+            os << "🂡";
+            break;
+        case 1:
+            os << "🂢";
+            break;
+        case 2:
+            os << "🂣";
+            break;
+        case 3:
+            os << "🂤";
+            break;
+        case 4:
+            os << "🂥";
+            break;
+        case 5:
+            os << "🂦";
+            break;
+        case 6:
+            os << "🂧";
+            break;
+        case 7:
+            os << "🂨";
+            break;
+        case 8:
+            os << "🂩";
+            break;
+        case 9:
+            os << "🂪";
+            break;
+        case 10:
+            os << "🂫";
+            break;
+        case 11:
+            os << "🂭";
+            break;
+        case 12:
+            os << "🂮";
+            break;
+        }
         break;
     case DIAMOND:
-        os << "D";
+        os << "\033[0;31m";
+
+        switch (c.value)
+        {
+        case 0:
+            os << "🃁";
+            break;
+        case 1:
+            os << "🃂";
+            break;
+        case 2:
+            os << "🃃";
+            break;
+        case 3:
+            os << "🃄";
+            break;
+        case 4:
+            os << "🃅";
+            break;
+        case 5:
+            os << "🃆";
+            break;
+        case 6:
+            os << "🃇";
+            break;
+        case 7:
+            os << "🃈";
+            break;
+        case 8:
+            os << "🃉";
+            break;
+        case 9:
+            os << "🃊";
+            break;
+        case 10:
+            os << "🃋";
+            break;
+        case 11:
+            os << "🃍";
+            break;
+        case 12:
+            os << "🃎";
+            break;
+        }
         break;
     case HEART:
-        os << "H";
+        os << "\033[0;31m";
+        switch (c.value)
+        {
+        case 0:
+            os << "🂱";
+            break;
+        case 1:
+            os << "🂲";
+            break;
+        case 2:
+            os << "🂳";
+            break;
+        case 3:
+            os << "🂴";
+            break;
+        case 4:
+            os << "🂵";
+            break;
+        case 5:
+            os << "🂶";
+            break;
+        case 6:
+            os << "🂷";
+            break;
+        case 7:
+            os << "🂸";
+            break;
+        case 8:
+            os << "🂹";
+            break;
+        case 9:
+            os << "🂺";
+            break;
+        case 10:
+            os << "🂻";
+            break;
+        case 11:
+            os << "🂽";
+            break;
+        case 12:
+            os << "🂾";
+            break;
+        }
         break;
     case CLUB:
-        os << "C";
+        os << "\033[30m";
+        switch (c.value)
+        {
+        case 0:
+            os << "🃑";
+            break;
+        case 1:
+            os << "🃒";
+            break;
+        case 2:
+            os << "🃓";
+            break;
+        case 3:
+            os << "🃔";
+            break;
+        case 4:
+            os << "🃕";
+            break;
+        case 5:
+            os << "🃖";
+            break;
+        case 6:
+            os << "🃗";
+            break;
+        case 7:
+            os << "🃘";
+            break;
+        case 8:
+            os << "🃙";
+            break;
+        case 9:
+            os << "🃚";
+            break;
+        case 10:
+            os << "🃛";
+            break;
+        case 11:
+            os << "🃝";
+            break;
+        case 12:
+            os << "🃞";
+            break;
+        }
         break;
     }
 
-    os << " ";
+    os << "\033[1;37m";
+    os << "\033[0m ";
 
     return os;
 }
