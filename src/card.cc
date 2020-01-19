@@ -8,7 +8,7 @@ Card::Card(enum Color color, int value)
     this->value = value;
 }
 
-int Card::getValue()
+size_t Card::getValue()
 {
     return value;
 }
@@ -16,6 +16,55 @@ int Card::getValue()
 enum Color Card::getColor()
 {
     return color;
+}
+
+int Card::getCardValue()
+{
+    switch (value)
+    {
+    case 0:
+        return 1;
+        break;
+    case 1:
+        return 2;
+        break;
+    case 2:
+        return 3;
+        break;
+    case 3:
+        return 4;
+        break;
+    case 4:
+        return 5;
+        break;
+    case 5:
+        return 6;
+        break;
+    case 6:
+        return 7;
+        break;
+    case 7:
+        return 8;
+        break;
+    case 8:
+        return 9;
+        break;
+    case 9:
+        return 10;
+        break;
+    case 10:
+        if (color & (DIAMOND | HEART))
+            return -1;
+        return 11;
+        break;
+    case 11:
+        return 11;
+        break;
+    case 12:
+        return 11;
+        break;
+    }
+    return value;
 }
 
 std::ostream& operator<<(std::ostream& os, const Card& c)

@@ -1,5 +1,6 @@
 #include "deck.hh"
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <random>
@@ -55,6 +56,11 @@ void Deck::shuffle()
     }
 }
 
+void Deck::sort()
+{
+    std::sort((*cards).begin(), (*cards).end());
+}
+
 template <typename T>
 void pop_front(std::vector<T>& vec)
 {
@@ -73,15 +79,36 @@ Card Deck::pick(int index)
     return c;
 }
 
+void Deck::popBack()
+{
+    (*cards).pop_back();
+}
+
 void Deck::add(Card c)
 {
     (*cards).push_back(c);
+}
+
+size_t Deck::getValueAt(size_t i)
+{
+    return (*cards).at(i).getValue();
+}
+
+enum Color Deck::getColorAt(size_t i)
+{
+    return (*cards).at(i).getColor();
 }
 
 void Deck::addDeck(Deck deck)
 {
     while (deck.getSize() > 0)
         (*cards).push_back(deck.pick());
+}
+
+void Deck::copyDeck(Deck deck)
+{
+    for (size_t i = 0; i < deck.getSize(); i++)
+        add(Card(deck.getColorAt(i), deck.getValueAt(i)));
 }
 
 size_t Deck::getSize()
@@ -93,16 +120,89 @@ int Deck::getValue()
 {
     int sum = 0;
     for (size_t i = 0; i < (*cards).size(); i++)
-    {
-        if ((*cards).at(i).getValue() == 10
-            && ((*cards).at(i).getColor() & (DIAMOND | HEART)))
-            sum += -1;
-        else if ((*cards).at(i).getValue() > 9)
-            sum += 11;
-        else
-            sum += (*cards).at(i).getValue() + 1;
-    }
+        sum += (*cards).at(i).getCardValue();
+
     return sum;
+}
+
+bool Deck::checkGreenHand()
+{
+    return getValue() <= 7;
+}
+
+bool Deck::checkSameValue()
+{
+    bool res = true;
+    for (size_t i = 0; res && i < (*cards).size() - 1; i++)
+        res &= ((*cards).at(i).getValue() == (*cards).at(i + 1).getValue());
+    return res;
+}
+
+bool Deck::checkSameColor()
+{
+    bool res = true;
+    for (size_t i = 0; res && i < (*cards).size() - 1; i++)
+        res &= ((*cards).at(i).getColor() == (*cards).at(i + 1).getColor());
+    return res;
+}
+
+bool Deck::checkSequence()
+{
+    bool res = true;
+    for (size_t i = 0; res && i < (*cards).size() - 1; i++)
+        res &= ((*cards).at(i).getValue() + 1 == (*cards).at(i + 1).getValue());
+    return res;
+}
+
+bool Deck::checkCombo()
+{
+    sort();
+    if (checkSameValue())
+        return true;
+    if (checkSameColor() && checkSequence())
+        return true;
+    return false;
+}
+
+void Deck::__generateCombination(std::shared_ptr<std::vector<Deck>> combos,
+                                 Deck combination, int offset, int k)
+{
+    if (k == 0)
+    {
+        std::cout << "[offset:" << offset << " k:" << k << "] -> "
+                  << combination << "\n";
+        if (combination.checkCombo())
+        {
+            std::cout << "Combo\n";
+            Deck c = Deck();
+            c.copyDeck(combination);
+            (*combos).push_back(c);
+        }
+    } else
+    {
+        for (size_t i = offset; i <= (*cards).size() - k; ++i)
+        {
+            combination.add((*cards).at(i));
+            __generateCombination(combos, combination, i + 1, k - 1);
+            combination.popBack();
+        }
+    }
+}
+
+std::shared_ptr<std::vector<Deck>> Deck::generateCombos()
+{
+    std::shared_ptr<std::vector<Deck>> combos =
+        std::make_shared<std::vector<Deck>>();
+
+    Deck combination = Deck();
+    __generateCombination(combos, combination, 0, 1);
+    __generateCombination(combos, combination, 0, 2);
+    __generateCombination(combos, combination, 0, 3);
+    __generateCombination(combos, combination, 0, 4);
+    __generateCombination(combos, combination, 0, 5);
+    __generateCombination(combos, combination, 0, 6);
+
+    return combos;
 }
 
 void Deck::clear()

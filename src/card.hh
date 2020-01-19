@@ -16,10 +16,18 @@ class Card
 public:
     Card(enum Color color, int value);
     friend std::ostream& operator<<(std::ostream& os, const Card& c);
-    int getValue();
+
+    size_t getValue();
     enum Color getColor();
+
+    int getCardValue();
+
+    bool operator<(const Card& other) const
+    {
+        return value < other.value;
+    }
 
 private:
     enum Color color;
-    int value;
+    size_t value;
 };
