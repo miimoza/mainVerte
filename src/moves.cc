@@ -4,7 +4,7 @@ bool checkGreenHand(Deck hand)
 {
     return hand.getValue() <= 7;
 }
-bool checkCombo(Deck deck)
+bool checkCombo(Deck combo)
 {
     return true;
 }

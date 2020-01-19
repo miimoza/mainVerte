@@ -3,6 +3,7 @@
 
 #include "game.hh"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -28,6 +29,7 @@ Game::Game()
     hand_p2 = Deck();
     cemetery = Deck();
     last_combo = Deck();
+    current_combo = Deck();
 
     heap.brandNew();
     heap.shuffle();
@@ -62,9 +64,9 @@ void Game::gameTurn(int player)
     {
         dump();
         std::string command_p1;
-        std::cout
-            << "\033[0;31m[P" << player
-            << "]\033[1;37m(<$card1_index,[...]>;<'h':heap,'c':cemetery>)$ ";
+        std::cout << "\033[0;92m[P" << player
+                  << "]\033[1;37m(<$card1_index,[...]>;<'h':heap,'c$index':"
+                     "cemetery>)$ ";
         std::cin >> command_p1;
         if (parse_and_apply(command_p1, player))
             valid_entry = true;
@@ -73,34 +75,14 @@ void Game::gameTurn(int player)
 
 int Game::parse_and_apply(std::string command, int player)
 {
-    std::cout << "RES:" << command << "\n";
-
     int semicolon_pos = command.find(";");
-    std::string combo_indexes = command.substr(0, semicolon_pos);
+    std::string combo_indexes_str = command.substr(0, semicolon_pos);
     std::string picking_way = command.substr(semicolon_pos + 1);
 
-    std::cout << "Combo:" << combo_indexes << "\n";
-    std::cout << "Pick:" << picking_way << "\n";
+    if (!fill_current_combo(combo_indexes_str, player))
+        return 0;
 
-    Deck combo = Deck();
-    std::stringstream ss(combo_indexes);
-
-    for (int i; ss >> i;)
-    {
-        std::cout << "c:" << i << "\n";
-
-        if (player == PLAYER_ONE)
-            combo.add(hand_p1.pick(i));
-        else
-            combo.add(hand_p2.pick(i));
-
-        if (ss.peek() == ',')
-            ss.ignore();
-    }
-
-    dump();
-
-    if (!put(combo))
+    if (!put())
         return 0;
 
     dump();
@@ -111,24 +93,78 @@ int Game::parse_and_apply(std::string command, int player)
             return 0;
     } else
     {
-        if (!pickUnder(picking_way.at(1), player))
+        std::string string = std::string(1, picking_way.at(1));
+        std::stringstream sstream(string);
+        size_t cemetery_index;
+
+        sstream >> cemetery_index;
+        if (!pickUnder(cemetery_index, player))
             return 0;
     }
 
     return 1;
 }
 
-int Game::put(Deck combo)
+int Game::fill_current_combo(std::string combo_indexes_str, int player)
 {
-    if (!checkCombo(combo))
+    if (combo_indexes_str.find_first_not_of("0123456789,") != std::string::npos)
+    {
+        std::cout << "[error] combo index must be a digit\n";
+        return 0;
+    }
+
+    std::stringstream ss(combo_indexes_str);
+    std::vector<size_t> combo_indexes = std::vector<size_t>();
+
+    for (size_t index; ss >> index;)
+    {
+        if ((player == PLAYER_ONE && index >= hand_p1.getSize())
+            || (player == PLAYER_TWO && index >= hand_p2.getSize()))
+        {
+            std::cout << "[error] invalid combo indexes\n";
+            return 0;
+        }
+        combo_indexes.push_back(index);
+
+        if (ss.peek() == ',')
+            ss.ignore();
+    }
+
+    std::sort(combo_indexes.begin(), combo_indexes.end());
+
+    auto it = std::unique(combo_indexes.begin(), combo_indexes.end());
+    bool containDuplicate = (it == combo_indexes.end());
+    if (!containDuplicate)
+    {
+        std::cout << "[error] combo index must not contain duplicate\n";
+        return 0;
+    }
+
+    for (int i = combo_indexes.size() - 1; i >= 0; i--)
+    {
+        if (player == PLAYER_ONE)
+            current_combo.add(hand_p1.pick(combo_indexes[i]));
+        else
+            current_combo.add(hand_p2.pick(combo_indexes[i]));
+
+        if (ss.peek() == ',')
+            ss.ignore();
+    }
+
+    return 1;
+}
+
+int Game::put()
+{
+    if (!checkCombo(current_combo))
     {
         std::cout << "[error] invalid combo\n";
         return 0;
     }
 
-    std::cout << "[PUT] " << combo << "\n";
+    std::cout << "[PUT] " << current_combo << "\n";
 
-    last_combo.addDeck(combo);
+    last_combo.addDeck(current_combo);
 
     return 1;
 }
@@ -137,11 +173,12 @@ int Game::pickUnder(size_t cemetery_index, int player)
 {
     if (cemetery_index >= cemetery.getSize())
     {
-        std::cout << "[error] invalid cemetery index\n";
+        std::cout << "[error] invalid cemetery index (" << cemetery_index << ">"
+                  << cemetery.getSize() - 1 << ")\n";
         return 0;
     }
 
-    std::cout << "[PICK_UNDER] " << cemetery_index << "\n";
+    std::cout << "[PICK_UNDER] cemetery_index:" << cemetery_index << "\n";
     if (player == PLAYER_ONE)
         hand_p1.add(cemetery.pick(cemetery_index));
     else
@@ -168,7 +205,7 @@ int Game::pickHeap(int player)
     else
         hand_p2.add(heap.pick());
 
-    heap.addDeck(cemetery);
+    cemetery.clear();
     cemetery.addDeck(last_combo);
 
     return 1;

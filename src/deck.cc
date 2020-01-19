@@ -12,8 +12,8 @@ Deck::Deck()
 std::ostream& operator<<(std::ostream& os, const Deck& d)
 {
     os << "[";
-    for (Card c : *d.cards)
-        os << c;
+    for (size_t i = 0; i < d.cards->size(); i++)
+        os << d.cards->at(i);
     os << "]";
 
     return os;
@@ -66,7 +66,10 @@ void pop_front(std::vector<T>& vec)
 Card Deck::pick(int index)
 {
     Card c = (*cards).at(index);
-    pop_front(*cards);
+    if (index == 0)
+        pop_front(*cards);
+    else
+        (*cards).erase((*cards).begin() + index);
     return c;
 }
 
