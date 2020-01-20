@@ -17,6 +17,9 @@ std::string AI::get_command()
     std::cout << "hand:" << hand << "\n";
     std::cout << "cemetery:" << cemetery << "\n";
 
+    if (hand.getValue() <= 7)
+        return "greenhand";
+
     combo.addDeck(get_best_combo());
 
     std::string command;
@@ -42,9 +45,14 @@ Deck AI::get_best_combo()
 
     size_t best_index = 0;
     for (size_t i = 1; i < (*combos).size(); i++)
-        if ((*combos).at(i).getValue() > (*combos).at(best_index).getValue())
+    {
+        // TECHNIC: ITS BEST TO PUT A LOW VALUE PAIR THAN A HIGH VALUE CARD
+        if ((*combos).at(i).getSize() > (*combos).at(best_index).getSize())
             best_index = i;
-
+        else if ((*combos).at(i).getValue()
+                 > (*combos).at(best_index).getValue())
+            best_index = i;
+    }
     return (*combos).at(best_index);
 }
 

@@ -9,8 +9,8 @@ class Game
 public:
     Game();
     void dump();
-    int declare_green_hand(int player);
-    int runLoop();
+    struct GameResult declare_green_hand(int player);
+    struct GameResult runLoop();
     bool userTurn(int player);
     bool AITurn(int player);
     int parse_and_apply(std::string command, int player);
@@ -27,4 +27,26 @@ private:
     Deck cemetery;
     Deck last_combo;
     Deck current_combo;
+
+    size_t turn_nb;
+};
+
+enum Status
+{
+    P1_SUCCESS = 1,
+    P2_SUCCESS = 2,
+    P1_BLACKBALL = 4,
+    P2_BLACKBALL = 8,
+    TIED = 16
+};
+
+struct GameResult
+{
+    GameResult(enum Status status, size_t turn)
+        : status(status)
+        , turn(turn)
+    {}
+
+    enum Status status;
+    size_t turn;
 };

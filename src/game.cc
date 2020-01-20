@@ -34,11 +34,14 @@ Game::Game()
 
     hand_p1.sort();
     hand_p2.sort();
+
+    turn_nb = 0;
 }
 
 void Game::dump()
 {
-    std::cout << "===================== GAME STATUS ======================\n";
+    std::cout << "===================== GAME STATUS (" << turn_nb
+              << ")==================\n";
     std::cout << "P1" << hand_p1 << "(" << hand_p1.getValue() << ") | P2"
               << hand_p2 << "(" << hand_p2.getValue() << ")\n";
     std::cout << "C" << cemetery << " | L" << last_combo << "\n";
@@ -46,54 +49,15 @@ void Game::dump()
     std::cout << "========================================================\n";
 }
 
-int Game::declare_green_hand(int player)
-{
-    std::cout << "============= MAIN VERTE BORDEL ===========\n";
-
-    int score_p1 = hand_p1.getValue();
-    int score_p2 = hand_p2.getValue();
-
-    if (player == PLAYER_ONE)
-    {
-        if (score_p1 > score_p2)
-        {
-            std::cout << "player 1 boule noire\n";
-            return 3;
-        }
-
-        if (score_p1 < score_p2)
-        {
-            std::cout << "main verte reussi player 1  bien vu\n";
-            return 1;
-        }
-
-    } else
-    {
-        if (score_p2 > score_p1)
-        {
-            std::cout << "player 2 boule noire\n";
-            return 4;
-        }
-
-        if (score_p2 < score_p1)
-        {
-            std::cout << "main verte pour le player 2 reussi bien vu\n";
-            return 2;
-        }
-    }
-
-    std::cout << "egalite\n";
-    return 0;
-}
-
-int Game::runLoop()
+struct GameResult Game::runLoop()
 {
     std::cout << "Let's go !\n";
 
     while (true)
     {
+        turn_nb++;
         dump();
-        if (userTurn(PLAYER_ONE))
+        if (AITurn(PLAYER_ONE))
             return declare_green_hand(PLAYER_ONE);
 
         dump();
@@ -101,7 +65,7 @@ int Game::runLoop()
             return declare_green_hand(PLAYER_TWO);
     }
 
-    return 0;
+    return GameResult(TIED, 0);
 }
 
 bool Game::AITurn(int player)
@@ -122,7 +86,7 @@ bool Game::AITurn(int player)
         return true;
 
     if (!res)
-        std::cout << "\033[0;41m[ENTRY NON VALID PLEASE FIX YOUR AI]\033[0m\n";
+        throw "\033[0;41m[ENTRY NON VALID PLEASE FIX YOUR AI]\033[0m\n";
 
     return false;
 }
@@ -244,6 +208,31 @@ bool Game::fill_current_combo(std::string combo_indexes_str, int player)
     }
 
     return true;
+}
+
+struct GameResult Game::declare_green_hand(int player)
+{
+    std::cout << "============= MAIN VERTE BORDEL ===========\n";
+
+    int score_p1 = hand_p1.getValue();
+    int score_p2 = hand_p2.getValue();
+
+    if (player == PLAYER_ONE)
+    {
+        if (score_p1 > score_p2)
+            return GameResult(P1_BLACKBALL, turn_nb);
+        if (score_p1 < score_p2)
+            return GameResult(P1_SUCCESS, turn_nb);
+    } else
+    {
+        if (score_p2 > score_p1)
+            return GameResult(P2_BLACKBALL, turn_nb);
+
+        if (score_p2 < score_p1)
+            return GameResult(P2_SUCCESS, turn_nb);
+    }
+
+    return GameResult(TIED, turn_nb);
 }
 
 bool Game::put(int player)
