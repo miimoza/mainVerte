@@ -165,27 +165,35 @@ bool Deck::checkCombo()
 }
 
 void Deck::__generateCombination(std::shared_ptr<std::vector<Deck>> combos,
-                                 Deck combination, int offset, int k)
+                                 Deck combination, size_t offset, size_t k)
 {
     if (k == 0)
     {
+        std::cout << "--------------- COMBINATION -------------\n";
         std::cout << "[offset:" << offset << " k:" << k << "] -> "
                   << combination << "\n";
-        if (combination.checkCombo())
+
+        Deck c = Deck();
+        c.copyDeck(combination);
+        if (c.checkCombo())
         {
             std::cout << "Combo\n";
-            Deck c = Deck();
-            c.copyDeck(combination);
             (*combos).push_back(c);
         }
     } else
     {
+        std::cout << "============== FOR LOOP (i=" << offset
+                  << " jusqua 6 - k=" << k << ") ==========\n";
         for (size_t i = offset; i <= (*cards).size() - k; ++i)
         {
             combination.add((*cards).at(i));
+            std::cout << "i:" << i << " combination:" << combination << "\n";
             __generateCombination(combos, combination, i + 1, k - 1);
             combination.popBack();
+            std::cout << "POP i:" << i << " combination:" << combination
+                      << "\n";
         }
+        std::cout << "============== FIN FOR LOOP ==========\n";
     }
 }
 
@@ -195,12 +203,8 @@ std::shared_ptr<std::vector<Deck>> Deck::generateCombos()
         std::make_shared<std::vector<Deck>>();
 
     Deck combination = Deck();
-    __generateCombination(combos, combination, 0, 1);
-    __generateCombination(combos, combination, 0, 2);
-    __generateCombination(combos, combination, 0, 3);
-    __generateCombination(combos, combination, 0, 4);
-    __generateCombination(combos, combination, 0, 5);
-    __generateCombination(combos, combination, 0, 6);
+    for (size_t i = 1; i <= (*cards).size(); i++)
+        __generateCombination(combos, combination, 0, i);
 
     return combos;
 }

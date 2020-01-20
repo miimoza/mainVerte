@@ -36,7 +36,7 @@ public:
     bool checkSequence();
 
     void __generateCombination(std::shared_ptr<std::vector<Deck>> combos,
-                               Deck combination, int offset, int k);
+                               Deck combination, size_t offset, size_t k);
     std::shared_ptr<std::vector<Deck>> generateCombos();
 
 private:
