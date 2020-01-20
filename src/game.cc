@@ -8,15 +8,7 @@
 #include <sstream>
 #include <string>
 
-void Game::dump()
-{
-    std::cout << "===================== GAME STATUS ======================\n";
-    std::cout << "P1" << hand_p1 << "(" << hand_p1.getValue() << ") | P2"
-              << hand_p2 << "(" << hand_p2.getValue() << ")\n";
-    std::cout << "C" << cemetery << " | L" << last_combo << "\n";
-    std::cout << "H" << heap << "\n";
-    std::cout << "========================================================\n";
-}
+#include "AI.hh"
 
 Game::Game()
 {
@@ -39,66 +31,158 @@ Game::Game()
     }
 
     cemetery.add(heap.pick());
+
+    hand_p1.sort();
+    hand_p2.sort();
 }
 
-void Game::runLoop()
+void Game::dump()
+{
+    std::cout << "===================== GAME STATUS ======================\n";
+    std::cout << "P1" << hand_p1 << "(" << hand_p1.getValue() << ") | P2"
+              << hand_p2 << "(" << hand_p2.getValue() << ")\n";
+    std::cout << "C" << cemetery << " | L" << last_combo << "\n";
+    std::cout << "H" << heap << "\n";
+    std::cout << "========================================================\n";
+}
+
+int Game::declare_green_hand(int player)
+{
+    std::cout << "============= MAIN VERTE BORDEL ===========\n";
+
+    int score_p1 = hand_p1.getValue();
+    int score_p2 = hand_p2.getValue();
+
+    if (player == PLAYER_ONE)
+    {
+        if (score_p1 > score_p2)
+        {
+            std::cout << "player 1 boule noire\n";
+            return 3;
+        }
+
+        if (score_p1 < score_p2)
+        {
+            std::cout << "main verte reussi player 1  bien vu\n";
+            return 1;
+        }
+
+    } else
+    {
+        if (score_p2 > score_p1)
+        {
+            std::cout << "player 2 boule noire\n";
+            return 4;
+        }
+
+        if (score_p2 < score_p1)
+        {
+            std::cout << "main verte pour le player 2 reussi bien vu\n";
+            return 2;
+        }
+    }
+
+    std::cout << "egalite\n";
+    return 0;
+}
+
+int Game::runLoop()
 {
     std::cout << "Let's go !\n";
 
     while (true)
     {
-        gameTurn(PLAYER_ONE);
+        dump();
+        if (userTurn(PLAYER_ONE))
+            return declare_green_hand(PLAYER_ONE);
 
-        std::shared_ptr<std::vector<Deck>> combos = hand_p2.generateCombos();
-
-        for (Deck d : *combos)
-            std::cout << d;
-        std::cout << "\n";
-
-        gameTurn(PLAYER_TWO);
+        dump();
+        if (AITurn(PLAYER_TWO))
+            return declare_green_hand(PLAYER_TWO);
     }
+
+    return 0;
 }
 
-void Game::gameTurn(int player)
+bool Game::AITurn(int player)
 {
-    if (player == PLAYER_ONE)
-        hand_p1.sort();
-    else
-        hand_p2.sort();
+    int res;
 
+    if (player == PLAYER_ONE)
+    {
+        AI ai_p1 = AI(hand_p1, cemetery);
+        res = parse_and_apply(ai_p1.get_command(), player);
+    } else
+    {
+        AI ai_p2 = AI(hand_p2, cemetery);
+        res = parse_and_apply(ai_p2.get_command(), player);
+    }
+
+    if (res == 2)
+        return true;
+
+    if (!res)
+        std::cout << "\033[0;41m[ENTRY NON VALID PLEASE FIX YOUR AI]\033[0m\n";
+
+    return false;
+}
+
+bool Game::userTurn(int player)
+{
     bool valid_entry = false;
+    int res;
     while (!valid_entry)
     {
-        dump();
         std::string command_p1;
         std::cout << "\033[0;92m[P" << player
                   << "]\033[1;37m(<$card1_index,[...]>;<'h':heap,'c$index':"
                      "cemetery>)$ ";
         std::cin >> command_p1;
-        if (parse_and_apply(command_p1, player))
+        res = parse_and_apply(command_p1, player);
+        if (res == 2)
+            return true;
+        else if (res == 1)
             valid_entry = true;
         else
             std::cout
                 << "\033[0;41m[ENTRY NON VALID PLEASE TRY AGAIN]\033[0m\n";
     }
+
+    if (player == PLAYER_ONE)
+        hand_p1.sort();
+    else
+        hand_p2.sort();
+
+    return false;
 }
 
-bool Game::parse_and_apply(std::string command, int player)
+int Game::parse_and_apply(std::string command, int player)
 {
+    if (!command.compare("greenhand"))
+    {
+        if ((player == PLAYER_ONE && !hand_p1.checkGreenHand())
+            || (player == PLAYER_TWO && !hand_p2.checkGreenHand()))
+        {
+            std::cout << "[error] greenhand not valid\n";
+            return 0;
+        }
+        return 2;
+    }
+
     int semicolon_pos = command.find(";");
     std::string combo_indexes_str = command.substr(0, semicolon_pos);
     std::string picking_way = command.substr(semicolon_pos + 1);
 
     if (!fill_current_combo(combo_indexes_str, player))
-        return false;
+        return 0;
 
     if (!put(player))
-        return false;
+        return 0;
 
     if (picking_way.compare("h") == 0)
     {
         if (!pickHeap(player))
-            return false;
+            return 0;
     } else
     {
         std::string string = std::string(1, picking_way.at(1));
@@ -107,10 +191,10 @@ bool Game::parse_and_apply(std::string command, int player)
 
         sstream >> cemetery_index;
         if (!pickUnder(cemetery_index, player))
-            return false;
+            return 0;
     }
 
-    return true;
+    return 1;
 }
 
 bool Game::fill_current_combo(std::string combo_indexes_str, int player)

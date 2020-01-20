@@ -169,31 +169,18 @@ void Deck::__generateCombination(std::shared_ptr<std::vector<Deck>> combos,
 {
     if (k == 0)
     {
-        std::cout << "--------------- COMBINATION -------------\n";
-        std::cout << "[offset:" << offset << " k:" << k << "] -> "
-                  << combination << "\n";
-
         Deck c = Deck();
         c.copyDeck(combination);
         if (c.checkCombo())
-        {
-            std::cout << "Combo\n";
             (*combos).push_back(c);
-        }
     } else
     {
-        std::cout << "============== FOR LOOP (i=" << offset
-                  << " jusqua 6 - k=" << k << ") ==========\n";
         for (size_t i = offset; i <= (*cards).size() - k; ++i)
         {
             combination.add((*cards).at(i));
-            std::cout << "i:" << i << " combination:" << combination << "\n";
             __generateCombination(combos, combination, i + 1, k - 1);
             combination.popBack();
-            std::cout << "POP i:" << i << " combination:" << combination
-                      << "\n";
         }
-        std::cout << "============== FIN FOR LOOP ==========\n";
     }
 }
 

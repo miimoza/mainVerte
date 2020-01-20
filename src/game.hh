@@ -9,9 +9,11 @@ class Game
 public:
     Game();
     void dump();
-    void runLoop();
-    void gameTurn(int player);
-    bool parse_and_apply(std::string command, int player);
+    int declare_green_hand(int player);
+    int runLoop();
+    bool userTurn(int player);
+    bool AITurn(int player);
+    int parse_and_apply(std::string command, int player);
     bool put(int player);
     bool pickUnder(size_t cemetery_index, int player);
     bool pickHeap(int player);
