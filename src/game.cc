@@ -38,34 +38,49 @@ Game::Game()
     turn_nb = 0;
 }
 
-void Game::dump()
+void Game::dump(int player)
 {
-    std::cout << "===================== GAME STATUS (" << turn_nb
-              << ")==================\n";
-    std::cout << "P1" << hand_p1 << "(" << hand_p1.getValue() << ") | P2"
-              << hand_p2 << "(" << hand_p2.getValue() << ")\n";
-    std::cout << "C" << cemetery << " | L" << last_combo << "\n";
-    std::cout << "H" << heap << "\n";
-    std::cout << "========================================================\n";
+    std::cout << "========(" << turn_nb << ")========\n";
+
+    if (player == PLAYER_ONE)
+    {
+        hand_p2.dumpBack();
+        std::cout << "\n";
+        std::cout << "             " << cemetery << "🂠\n";
+        std::cout << hand_p1 << "\n";
+        std::cout << "0 1 2 3 4 5\n";
+    } else if (player == PLAYER_TWO)
+    {
+        hand_p1.dumpBack();
+        std::cout << "\n";
+        std::cout << "             " << cemetery << "🂠\n";
+        std::cout << hand_p2 << "\n";
+        std::cout << "0 1 2 3 4 5\n";
+    } else
+    {
+        std::cout << hand_p1 << "\n";
+        std::cout << "             " << cemetery << "🂠\n";
+        std::cout << hand_p2 << "\n";
+    }
+
+    std::cout << "===================\n";
 }
 
-struct GameResult Game::runLoop()
+GameResult Game::runLoop()
 {
     std::cout << "Let's go !\n";
 
     while (true)
     {
         turn_nb++;
-        dump();
-        if (AITurn(PLAYER_ONE))
+        if (userTurn(PLAYER_ONE))
             return declare_green_hand(PLAYER_ONE);
 
-        dump();
         if (AITurn(PLAYER_TWO))
             return declare_green_hand(PLAYER_TWO);
     }
 
-    return GameResult(TIED, 0);
+    return GameResult(TIED, 0, 0);
 }
 
 bool Game::AITurn(int player)
@@ -75,11 +90,11 @@ bool Game::AITurn(int player)
     if (player == PLAYER_ONE)
     {
         AI ai_p1 = AI(hand_p1, cemetery);
-        res = parse_and_apply(ai_p1.get_command(), player);
+        res = parse_and_apply(ai_p1.getCommand(), player);
     } else
     {
         AI ai_p2 = AI(hand_p2, cemetery);
-        res = parse_and_apply(ai_p2.get_command(), player);
+        res = parse_and_apply(ai_p2.getCommand(), player);
     }
 
     if (res == 2)
@@ -93,29 +108,25 @@ bool Game::AITurn(int player)
 
 bool Game::userTurn(int player)
 {
+    dump(player);
     bool valid_entry = false;
     int res;
     while (!valid_entry)
     {
-        std::string command_p1;
-        std::cout << "\033[0;92m[P" << player
-                  << "]\033[1;37m(<$card1_index,[...]>;<'h':heap,'c$index':"
-                     "cemetery>)$ ";
-        std::cin >> command_p1;
-        res = parse_and_apply(command_p1, player);
+        std::string command;
+        std::cout << "\033[0;92m[P" << player << "]\033[1;37m$ ";
+        std::cin >> command;
+        res = parse_and_apply(command, player);
         if (res == 2)
             return true;
         else if (res == 1)
             valid_entry = true;
         else
-            std::cout
-                << "\033[0;41m[ENTRY NON VALID PLEASE TRY AGAIN]\033[0m\n";
+            std::cout << "\033[0;41m[ENTRY NON VALID PLEASE TRY "
+                         "AGAIN]\033[0m\n\033[0;41musage: "
+                         "<$card1_index,[...]>;<'h':heap,'c$index':"
+                         "cemetery>\033[0m\n";
     }
-
-    if (player == PLAYER_ONE)
-        hand_p1.sort();
-    else
-        hand_p2.sort();
 
     return false;
 }
@@ -137,6 +148,14 @@ int Game::parse_and_apply(std::string command, int player)
     std::string combo_indexes_str = command.substr(0, semicolon_pos);
     std::string picking_way = command.substr(semicolon_pos + 1);
 
+    if (semicolon_pos == -1 || !combo_indexes_str.size() || !picking_way.size())
+    {
+        std::cout << "[error] please respect usage "
+                     "(<$card1_index,[...]>;<'h':heap,'c$index':"
+                     "cemetery>)\n";
+        return 0;
+    }
+
     if (!fill_current_combo(combo_indexes_str, player))
         return 0;
 
@@ -147,16 +166,29 @@ int Game::parse_and_apply(std::string command, int player)
     {
         if (!pickHeap(player))
             return 0;
-    } else
+    } else if (picking_way.at(0) == 'c')
     {
-        std::string string = std::string(1, picking_way.at(1));
-        std::stringstream sstream(string);
+        std::string str;
+        if (picking_way.size() < 2)
+            str = std::string(1, '0');
+        else
+            str = std::string(1, picking_way.at(1));
+
+        std::stringstream sstream(str);
         size_t cemetery_index;
 
         sstream >> cemetery_index;
         if (!pickUnder(cemetery_index, player))
             return 0;
+    } else
+    {
+        return 0;
     }
+
+    if (player == PLAYER_ONE)
+        hand_p1.sort();
+    else
+        hand_p2.sort();
 
     return 1;
 }
@@ -210,9 +242,9 @@ bool Game::fill_current_combo(std::string combo_indexes_str, int player)
     return true;
 }
 
-struct GameResult Game::declare_green_hand(int player)
+GameResult Game::declare_green_hand(int player)
 {
-    std::cout << "============= MAIN VERTE BORDEL ===========\n";
+    dump();
 
     int score_p1 = hand_p1.getValue();
     int score_p2 = hand_p2.getValue();
@@ -220,19 +252,19 @@ struct GameResult Game::declare_green_hand(int player)
     if (player == PLAYER_ONE)
     {
         if (score_p1 > score_p2)
-            return GameResult(P1_BLACKBALL, turn_nb);
+            return GameResult(P1_BLACKBALL, turn_nb, score_p1);
         if (score_p1 < score_p2)
-            return GameResult(P1_SUCCESS, turn_nb);
+            return GameResult(P1_SUCCESS, turn_nb, score_p1);
     } else
     {
         if (score_p2 > score_p1)
-            return GameResult(P2_BLACKBALL, turn_nb);
+            return GameResult(P2_BLACKBALL, turn_nb, score_p2);
 
         if (score_p2 < score_p1)
-            return GameResult(P2_SUCCESS, turn_nb);
+            return GameResult(P2_SUCCESS, turn_nb, score_p2);
     }
 
-    return GameResult(TIED, turn_nb);
+    return GameResult(TIED, turn_nb, score_p1);
 }
 
 bool Game::put(int player)

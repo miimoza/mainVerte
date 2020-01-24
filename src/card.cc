@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "deck.hh"
+
 Card::Card(enum Color color, int value)
 {
     this->color = color;
@@ -258,4 +260,9 @@ std::ostream& operator<<(std::ostream& os, const Card& c)
     os << "\033[0m ";
 
     return os;
+}
+
+bool Card::operator==(const Card& c) const
+{
+    return value == c.value && color == c.color;
 }

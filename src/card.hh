@@ -15,6 +15,7 @@ class Card
 {
 public:
     Card(enum Color color, int value);
+    bool operator==(const Card& c) const;
     friend std::ostream& operator<<(std::ostream& os, const Card& c);
 
     size_t getValue();

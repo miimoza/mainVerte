@@ -12,12 +12,16 @@ Deck::Deck()
 
 std::ostream& operator<<(std::ostream& os, const Deck& d)
 {
-    os << "[";
     for (size_t i = 0; i < d.cards->size(); i++)
         os << d.cards->at(i);
-    os << "]";
 
     return os;
+}
+
+void Deck::dumpBack()
+{
+    for (size_t i = 0; i < cards->size(); i++)
+        std::cout << "🂠 ";
 }
 
 void Deck::brandNew()
@@ -69,7 +73,12 @@ void pop_front(std::vector<T>& vec)
     vec.pop_back();
 }
 
-Card Deck::pick(int index)
+Card Deck::getCard(size_t index)
+{
+    return Card(getColorAt(index), getValueAt(index));
+}
+
+Card Deck::pick(size_t index)
 {
     Card c = (*cards).at(index);
     if (index == 0)
@@ -123,6 +132,14 @@ int Deck::getValue()
         sum += (*cards).at(i).getCardValue();
 
     return sum;
+}
+
+int Deck::find(Card c)
+{
+    for (size_t i = 0; i < getSize(); i++)
+        if ((*cards).at(i) == c)
+            return i;
+    return -1;
 }
 
 bool Deck::checkGreenHand()

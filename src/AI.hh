@@ -8,12 +8,13 @@ class AI
 {
 public:
     AI(Deck hand, Deck cemetery);
-    std::string get_command();
-    Deck get_best_combo();
-    std::string get_combo_indexes();
-    std::string get_pickway();
+    std::string getCommand();
+    Deck getBestCombo(Deck hand);
+    std::string getComboIndexes();
+    float getCardCapacity(Card card);
+    std::string getPickway();
 
-    void update_hand();
+    void updateHand();
 
 private:
     Deck hand;

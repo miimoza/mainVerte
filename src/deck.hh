@@ -13,12 +13,14 @@ class Deck
 public:
     Deck();
     friend std::ostream& operator<<(std::ostream& os, const Deck& d);
+    void dumpBack();
     void brandNew();
     void shuffle();
     void sort();
     void clear();
 
-    Card pick(int index = 0);
+    Card getCard(size_t index);
+    Card pick(size_t index = 0);
     void popBack();
     void copyDeck(Deck deck);
     void add(Card c);
@@ -28,6 +30,7 @@ public:
     size_t getValueAt(size_t i);
     size_t getSize();
     int getValue();
+    int find(Card c);
 
     bool checkGreenHand();
     bool checkCombo();
