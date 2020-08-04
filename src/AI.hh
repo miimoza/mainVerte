@@ -7,7 +7,7 @@
 class AI
 {
 public:
-    AI(Deck hand, Deck cemetery);
+    AI(Deck hand, Deck cemetery, size_t nb_cards_opponent);
     std::string getCommand();
     Deck getBestCombo(Deck hand);
     std::string getComboIndexes();
@@ -20,4 +20,5 @@ private:
     Deck hand;
     Deck cemetery;
     Deck combo;
+    size_t nb_cards_opponent;
 };

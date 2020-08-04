@@ -21,6 +21,7 @@ void simulation(size_t nb_game)
     {
         Game game = Game();
         GameResult result = game.runLoop();
+        result.dump();
         switch (result.status)
         {
         case P1_SUCCESS:
@@ -86,5 +87,5 @@ void simulation(size_t nb_game)
 
 int main()
 {
-    simulation(10000);
+    simulation(1000);
 }

@@ -3,8 +3,9 @@
 #include <iostream>
 #include <string>
 
-AI::AI(Deck hand, Deck cemetery)
+AI::AI(Deck hand, Deck cemetery, size_t nb_cards_opponent)
 {
+    this->nb_cards_opponent = nb_cards_opponent;
     this->hand = Deck();
     this->cemetery = Deck();
     this->combo = Deck();
@@ -15,7 +16,8 @@ AI::AI(Deck hand, Deck cemetery)
 
 std::string AI::getCommand()
 {
-    if (hand.getValue() <= 7)
+    float greenhand_limit = (nb_cards_opponent > 3) ? 7 : nb_cards_opponent;
+    if (hand.getValue() <= greenhand_limit)
         return "greenhand";
 
     combo.addDeck(getBestCombo(hand));
@@ -28,18 +30,24 @@ std::string AI::getCommand()
     updateHand();
     command += getPickway();
 
-    std::cout << "IA command:" << command << "\n";
+    // std::cout << "IA command:" << command << "\n";
 
     return command;
 }
 
 Deck AI::getBestCombo(Deck hand)
 {
+    // INITIALISATION
+    float average_value_per_card =
+        (float)hand.getValue() / (float)hand.getSize();
+    float limit_pair_value =
+        (float)nb_cards_opponent + average_value_per_card / 5;
+
     std::shared_ptr<std::vector<Deck>> combos = hand.generateCombos();
 
-    for (auto d : *combos)
-        std::cout << d;
-    std::cout << "\n";
+    /*for (auto d : *combos)
+        std::cout << d << ",";
+    std::cout << "\n";*/
 
     size_t best_index = 0;
     for (size_t combo_index = 1; combo_index < (*combos).size(); combo_index++)
@@ -47,7 +55,7 @@ Deck AI::getBestCombo(Deck hand)
         // TECHNIC: ITS BEST TO PUT A LOW VALUE PAIR THAN A HIGH VALUE CARD
         if ((*combos).at(combo_index).getSize()
                 > (*combos).at(best_index).getSize()
-            && (*combos).at(combo_index).getValue() > 2)
+            && (*combos).at(combo_index).getValue() > limit_pair_value)
             best_index = combo_index;
         else if ((*combos).at(combo_index).getValue()
                  > (*combos).at(best_index).getValue())
@@ -114,15 +122,17 @@ float AI::getCardCapacity(Card card)
     float value_coeff =
         (average_value_per_card - ambition - card.getCardValue()) / 2;
 
-    // ambition
-    std::cout << "value:" << hand.getValue() << "\n";
-    std::cout << "size :" << hand.getSize() << "\n";
-    std::cout << "nb_real_combo_eventual:" << nb_real_combo_eventual << "\n";
-    std::cout << "nb_real_combo_hand:" << nb_real_combo_hand << "\n";
-    std::cout << "average_value_per_card:" << average_value_per_card << "\n";
-    std::cout << "combo coeff:" << combo_coeff << "\n";
-    std::cout << "value coeff:" << value_coeff << "\n";
-    std::cout << "capacity" << combo_coeff + value_coeff << "\n";
+    /*
+// ambition
+std::cout << "value:" << hand.getValue() << "\n";
+std::cout << "size :" << hand.getSize() << "\n";
+std::cout << "nb_real_combo_eventual:" << nb_real_combo_eventual << "\n";
+std::cout << "nb_real_combo_hand:" << nb_real_combo_hand << "\n";
+std::cout << "average_value_per_card:" << average_value_per_card << "\n";
+std::cout << "combo coeff:" << combo_coeff << "\n";
+std::cout << "value coeff:" << value_coeff << "\n";
+std::cout << "capacity" << combo_coeff + value_coeff << "\n";
+*/
 
     return combo_coeff + value_coeff;
 }
@@ -135,8 +145,8 @@ std::string AI::getPickway()
             > getCardCapacity(cemetery.getCard(best_cemetery_card_index)))
             best_cemetery_card_index = i;
 
-    std::cout << "best cemetery:" << cemetery.getCard(best_cemetery_card_index)
-              << "\n";
+    // std::cout << "best cemetery:" <<
+    // cemetery.getCard(best_cemetery_card_index) << "\n";
 
     if (getCardCapacity(cemetery.getCard(best_cemetery_card_index)) > 0)
         return "c" + std::to_string(best_cemetery_card_index);

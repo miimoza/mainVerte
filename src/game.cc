@@ -12,8 +12,6 @@
 
 Game::Game()
 {
-    std::cout << "Init the game...\n";
-
     heap = Deck();
     hand_p1 = Deck();
     hand_p2 = Deck();
@@ -58,9 +56,9 @@ void Game::dump(int player)
         std::cout << "0 1 2 3 4 5\n";
     } else
     {
-        std::cout << hand_p1 << "\n";
-        std::cout << "             " << cemetery << "🂠\n";
         std::cout << hand_p2 << "\n";
+        std::cout << "             " << cemetery << "🂠\n";
+        std::cout << hand_p1 << "\n";
     }
 
     std::cout << "===================\n";
@@ -68,8 +66,6 @@ void Game::dump(int player)
 
 GameResult Game::runLoop()
 {
-    std::cout << "Let's go !\n";
-
     while (true)
     {
         turn_nb++;
@@ -89,11 +85,11 @@ bool Game::AITurn(int player)
 
     if (player == PLAYER_ONE)
     {
-        AI ai_p1 = AI(hand_p1, cemetery);
+        AI ai_p1 = AI(hand_p1, cemetery, hand_p2.getSize());
         res = parse_and_apply(ai_p1.getCommand(), player);
     } else
     {
-        AI ai_p2 = AI(hand_p2, cemetery);
+        AI ai_p2 = AI(hand_p2, cemetery, hand_p1.getSize());
         res = parse_and_apply(ai_p2.getCommand(), player);
     }
 
@@ -244,7 +240,7 @@ bool Game::fill_current_combo(std::string combo_indexes_str, int player)
 
 GameResult Game::declare_green_hand(int player)
 {
-    dump();
+    // dump();
 
     int score_p1 = hand_p1.getValue();
     int score_p2 = hand_p2.getValue();
@@ -281,7 +277,7 @@ bool Game::put(int player)
         return false;
     }
 
-    std::cout << "[PUT] " << current_combo << "\n";
+    // std::cout << "[PUT] " << current_combo << "\n";
 
     last_combo.addDeck(current_combo);
 
@@ -297,7 +293,7 @@ bool Game::pickUnder(size_t cemetery_index, int player)
         return false;
     }
 
-    std::cout << "[PICK_UNDER] cemetery_index:" << cemetery_index << "\n";
+    // std::cout << "[PICK_UNDER] cemetery_index:" << cemetery_index << "\n";
     if (player == PLAYER_ONE)
         hand_p1.add(cemetery.pick(cemetery_index));
     else
@@ -318,7 +314,7 @@ bool Game::pickHeap(int player)
         return false;
     }
 
-    std::cout << "[PICK_HEAP]\n";
+    // std::cout << "[PICK_HEAP]\n";
     if (player == PLAYER_ONE)
         hand_p1.add(heap.pick());
     else

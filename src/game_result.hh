@@ -15,6 +15,7 @@ class GameResult
 {
 public:
     GameResult(enum Status status, size_t turn, int greenhand_value);
+    void dump();
 
     enum Status status;
     size_t turn;

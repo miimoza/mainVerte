@@ -6,6 +6,9 @@ GameResult::GameResult(enum Status status, size_t turn, int greenhand_value)
     : status(status)
     , turn(turn)
     , greenhand_value(greenhand_value)
+{}
+
+void GameResult::dump()
 {
     std::cout << "*******************\n";
     std::cout << "*** GREEN HAND ! **\n";
@@ -31,6 +34,6 @@ GameResult::GameResult(enum Status status, size_t turn, int greenhand_value)
         break;
     }
 
-    std::cout << "- GREENHAND VALUE: " << greenhand_value << "\n";
-    std::cout << "- TURN NUMBER:" << turn << "\n";
+    std::cout << "GREENHAND VALUE: " << greenhand_value << "\n";
+    std::cout << "TURN NUMBER:" << turn << "\n";
 }
