@@ -69,7 +69,7 @@ GameResult Game::runLoop()
     while (true)
     {
         turn_nb++;
-        if (userTurn(PLAYER_ONE))
+        if (AITurn(PLAYER_ONE))
             return declare_green_hand(PLAYER_ONE);
 
         if (AITurn(PLAYER_TWO))
